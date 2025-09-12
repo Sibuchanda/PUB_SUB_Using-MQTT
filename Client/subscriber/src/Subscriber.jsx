@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import mqtt from "mqtt";
 import { toast } from "react-hot-toast";
 
-
 function base64ToArrayBuffer(base64) {
   const binaryString = window.atob(base64);
   const bytes = new Uint8Array(binaryString.length);
@@ -16,7 +15,7 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 async function deriveKey() {
-  const salt = encoder.encode("static_salt_demo");
+  const salt = encoder.encode("thisIsStaticSaltValue");
   const baseKey = await crypto.subtle.importKey(
     "raw",
     encoder.encode(`${import.meta.env.VITE_SYMMETRIC_KEY}`),
@@ -32,13 +31,18 @@ async function deriveKey() {
       hash: "SHA-256",
     },
     baseKey,
-    { name: "AES-GCM", length: 256 },
+    { name: "AES-CBC", length: 256 },
     false,
     ["decrypt"]
   );
 }
 
-// Decrypt Message
+
+function unpad(data) {
+  const padLength = data[data.length - 1];
+  return data.slice(0, data.length - padLength);
+}
+
 async function decryptMessage(encrypted) {
   try {
     const key = await deriveKey();
@@ -46,12 +50,13 @@ async function decryptMessage(encrypted) {
     const ciphertext = base64ToArrayBuffer(encrypted.ciphertext);
 
     const decrypted = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
+      { name: "AES-CBC", iv },
       key,
       ciphertext
     );
 
-    return decoder.decode(decrypted);
+    const unpadded = unpad(new Uint8Array(decrypted));
+    return decoder.decode(unpadded);
   } catch (err) {
     console.error("Decryption failed:", err);
     return "[Decryption Failed]";
@@ -60,7 +65,7 @@ async function decryptMessage(encrypted) {
 
 export default function Subscriber() {
   const [messages, setMessages] = useState([]);
-  const topic = "patient/encrypted";
+  const topic = "patient/record";
 
   useEffect(() => {
     const client = mqtt.connect(`${import.meta.env.VITE_SOCKET_URL}`);
@@ -75,7 +80,7 @@ export default function Subscriber() {
       });
     });
 
-    client.on("message", async (topic, message) => {
+    client.on("message", async (_, message) => {
       try {
         const parsed = JSON.parse(message.toString());
         const decrypted = await decryptMessage(parsed);
@@ -95,16 +100,12 @@ export default function Subscriber() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-blue-50 gap-8">
       <h2 className="text-4xl font-bold mb-4 text-blue-700">Subscriber</h2>
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md">
-
         <div className="space-y-2">
           {messages.length === 0 && (
             <p className="text-gray-500">No messages received.</p>
           )}
           {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className="p-2 rounded bg-blue-100 text-blue-900"
-            >
+            <div key={idx} className="p-2 rounded">
               {msg}
             </div>
           ))}

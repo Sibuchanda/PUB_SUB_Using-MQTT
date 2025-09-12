@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = "";
@@ -11,10 +10,11 @@ function arrayBufferToBase64(buffer) {
   }
   return window.btoa(binary);
 }
+
 const encoder = new TextEncoder();
 
 async function deriveKey() {
-  const salt = encoder.encode("static_salt_demo");
+  const salt = encoder.encode("thisIsStaticSaltValue");
   const baseKey = await crypto.subtle.importKey(
     "raw",
     encoder.encode(`${import.meta.env.VITE_SYMMETRIC_KEY}`),
@@ -30,27 +30,35 @@ async function deriveKey() {
       hash: "SHA-256",
     },
     baseKey,
-    { name: "AES-GCM", length: 256 },
+    { name: "AES-CBC", length: 256 },
     false,
     ["encrypt", "decrypt"]
   );
 }
 
-// Message Encription
+function pad(data) {
+  const blockSize = 16;
+  const padLength = blockSize - (data.byteLength % blockSize);
+  const padded = new Uint8Array(data.byteLength + padLength);
+  padded.set(data);
+  padded.fill(padLength, data.byteLength);
+  return padded;
+}
+
 async function encryptMessage(plaintext) {
   const key = await deriveKey();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = crypto.getRandomValues(new Uint8Array(16));
+  const padded = pad(encoder.encode(plaintext));
   const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-CBC", iv },
     key,
-    encoder.encode(plaintext)
+    padded
   );
   return {
     iv: arrayBufferToBase64(iv.buffer),
     ciphertext: arrayBufferToBase64(ciphertext),
   };
 }
-
 
 export default function Publisher() {
   const [message, setMessage] = useState("");
@@ -75,7 +83,7 @@ export default function Publisher() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Error occcured while sending message");
+      toast.error("Error occured while sending message");
     } finally {
       setLoading(false);
       setMessage("");
@@ -90,10 +98,9 @@ export default function Publisher() {
           rows={3}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full p-2 border rounded mb-4 focus:outline-none"
           placeholder="Enter your message.."
         />
-
         <button
           onClick={handleSend}
           disabled={loading}

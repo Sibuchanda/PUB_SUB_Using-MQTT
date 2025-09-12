@@ -9,14 +9,14 @@ const publishMessage = async (req, res) => {
     }
 
     // MQTT topic
-    const topic = "patient/encrypted";
+    const topic = "patient/record";
 
     client.publish(topic, JSON.stringify(encrypted), (err) => {
       if (err) {
         console.error("Error Occured while publishing message : ", err);
         return res.status(500).json({ success: false, message: "MQTT publish failed" });
       }
-      console.log("Published to topic:", topic, encrypted);
+      // console.log("Published to topic:", topic, encrypted);
       return res.json({ success: true, message: "Message published successfully" });
     });
   } catch (error) {
