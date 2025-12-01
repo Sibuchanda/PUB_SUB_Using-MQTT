@@ -4,8 +4,6 @@ import { performAuthInit } from "../auth/authClient";
 import { toast } from "react-hot-toast";
 
 export default function AuthButton({ onAuthSuccess }) {
-
-  console.log("AuthButton rendered");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
 

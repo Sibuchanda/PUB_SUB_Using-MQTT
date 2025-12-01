@@ -4,7 +4,7 @@ const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
 
-const b64ToArrayBuffer = (b64)=>{
+export const b64ToArrayBuffer = (b64)=>{
   const binary = window.atob(b64);
   const len = binary.length;
   const bytes = new Uint8Array(len);
