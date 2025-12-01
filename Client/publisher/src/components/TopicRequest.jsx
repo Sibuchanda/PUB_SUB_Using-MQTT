@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { rsaEncryptPayload, importRsaPublicKey, fetchServerPublicKey,
-         importSessionKeyFromBase64, b64ToArrayBuffer } from "../auth/authClient";
+import {
+  rsaEncryptPayload,
+  importRsaPublicKey,
+  fetchServerPublicKey,
+  importSessionKeyFromBase64,
+  b64ToArrayBuffer,
+} from "../auth/authClient";
+import { useNavigate } from "react-router-dom";
 
 export default function TopicRequest() {
   const [topic, setTopic] = useState("");
   const [status, setStatus] = useState("");
+  const navigate = useNavigate();
 
   const requestTopicKey = async () => {
     try {
@@ -78,10 +85,9 @@ export default function TopicRequest() {
       // Save it for Phase 5
       localStorage.setItem(`TK_${topic}`, tkTopic);
 
-      alert("Topic Key Retrieved Successfully!\n\nTK_topic saved in browser.");
-
+      alert("Topic Key Retrieved Successfully!");
       setStatus("Topic key saved.");
-
+      navigate("/send-message");
     } catch (err) {
       console.error("Topic key error:", err);
       alert("Failed: " + err.message);
@@ -107,9 +113,7 @@ export default function TopicRequest() {
         Request
       </button>
 
-      {status && (
-        <p className="text-gray-700 font-medium">{status}</p>
-      )}
+      {status && <p className="text-gray-700 font-medium">{status}</p>}
     </div>
   );
 }
