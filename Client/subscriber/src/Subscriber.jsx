@@ -67,34 +67,30 @@ export default function Subscriber() {
   const [messages, setMessages] = useState([]);
   const topic = "patient/record";
 
-  useEffect(() => {
-    const client = mqtt.connect(`${import.meta.env.VITE_SOCKET_URL}`);
-    client.on("connect", () => {
-      console.log("Connected to MQTT broker");
-      client.subscribe(topic, (err) => {
-        if (!err) {
-          toast.success(`Subscribed to ${topic}`);
-        } else {
-          toast.error("Subscription failed");
-        }
-      });
-    });
+useEffect(() => {
+  const deviceId = import.meta.env.VITE_DEVICE_ID;
+  const rePassword = localStorage.getItem("rePasswordBase64");
 
-    client.on("message", async (_, message) => {
-      try {
-        const parsed = JSON.parse(message.toString());
-        const decrypted = await decryptMessage(parsed);
-        setMessages((prev) => [decrypted, ...prev]);
-      } catch (err) {
-        console.error("Message error:", err);
-        setMessages((prev) => ["[Invalid Message]", ...prev]);
-      }
-    });
+  const client = mqtt.connect(import.meta.env.VITE_SOCKET_URL, {
+    username: deviceId,
+    password: rePassword,
+  });
 
-    return () => {
-      client.end();
-    };
-  }, []);
+  client.on("connect", () => {
+    console.log("MQTT Connected");
+    client.subscribe(topic);
+  });
+
+  client.on("error", err => {
+    console.error("MQTT error:", err);
+  });
+
+  client.on("message", async (_, message) => {
+  });
+
+  return () => client.end();
+}, []);
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-blue-50 gap-8">

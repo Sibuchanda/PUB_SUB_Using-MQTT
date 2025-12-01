@@ -1,0 +1,10 @@
+{
+  "http": {
+    "users": {
+      "uri": "http://host.docker.internal:5000/mqtt/auth"
+    },
+    "acls": {
+      "uri": "http://host.docker.internal:5000/mqtt/acl"
+    }
+  }
+}

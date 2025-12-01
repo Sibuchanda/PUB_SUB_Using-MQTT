@@ -4,6 +4,7 @@ import connectDB from "./config/db.js";
 import keyRoutes from './routes/keyRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import mqttRoutes from './routes/mqttRoutes.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use("/keys", keyRoutes);
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
+app.use('/mqtt', mqttRoutes);
 
 
 app.listen(PORT, () => {

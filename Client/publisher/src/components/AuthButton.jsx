@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import { performAuthInit } from "../auth/authClient";
 import { toast } from "react-hot-toast";
 
-export default function AuthButton() {
+export default function AuthButton({ onAuthSuccess }) {
+
+  console.log("AuthButton rendered");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
 
@@ -13,11 +15,11 @@ export default function AuthButton() {
 
     try {
       const result = await performAuthInit();
-
       console.log("AUTH RESULT:", result);
-
       setStatus("Authenticated successfully!");
       toast.success("Authenticated successfully!");
+
+      if (onAuthSuccess) onAuthSuccess();
 
     } catch (error) {
       console.error("AUTH ERROR:", error);
@@ -41,7 +43,7 @@ export default function AuthButton() {
     </button>
 
     {status && !loading && (
-      <div className="text-blue-600 font-medium">
+      <div className="text-green-600 font-medium">
         {status}
       </div>
     )}
