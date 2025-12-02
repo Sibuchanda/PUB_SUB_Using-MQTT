@@ -104,16 +104,17 @@ export default function MessageDisplay() {
 
   return (
     <div className="p-5">
-      <h2 className="text-xl font-bold">Subscriber – Message</h2>
+      <div className="w-full flex flex-col items-center justify-center">
+      <h2 className="text-4xl font-bold">Subscriber – Message</h2>
       <p>{status}</p>
+      </div>
 
       <div className="mt-5 space-y-3">
         {logs.map((log, i) => (
           <div key={i} className="border p-3 rounded">
             <div><b>Time:</b> {log.time}</div>
-            <div><b>Topic:</b> {log.topic}</div>
-            <div><b>Message:</b> {log.plaintext ?? "(none)"}</div>
-            <div><b>Integrity:</b> {log.integrity}</div>
+            <div><b>Topic:</b>{log.topic}</div>
+            <div><b>Message:</b> <span className="font-bold text-green-400"> {log.plaintext ?? "(none)"}</span></div>
           </div>
         ))}
       </div>
