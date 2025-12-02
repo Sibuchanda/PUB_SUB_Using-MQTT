@@ -85,7 +85,6 @@ export default function MessageSender() {
           const ctB64 = bytesToB64(new Uint8Array(encryptedBuf));
           const ivB64 = bytesToB64(iv);
 
-          // --- Build payload with iv, ciphertext, hash ---
           const payload = JSON.stringify({
             iv: ivB64,
             ciphertext: ctB64,
@@ -93,13 +92,12 @@ export default function MessageSender() {
           });
 
           client.publish(topic, payload, {}, () => {
-            console.log("Encrypted message sent to topic:", topic);
-            alert("Encrypted message sent!");
+            alert("Message sent to broker successfully");
             setStatus("Message sent.");
+            setMessage("");
             client.end();
           });
         } catch (err) {
-          console.error("Encryption/publish error:", err);
           alert("Failed to encrypt/send: " + err.message);
           setStatus("Error.");
           client.end();

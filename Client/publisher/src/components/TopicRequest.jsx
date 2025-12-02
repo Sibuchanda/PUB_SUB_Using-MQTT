@@ -83,6 +83,8 @@ export default function TopicRequest() {
       const tkTopic = decoder.decode(plain); // decrypted topic key (base64 string)
 
       // Save it for Phase 5
+      let requestedTopic=topic.trim();
+      localStorage.setItem(`currentTopic`, requestedTopic);
       localStorage.setItem(`TK_${topic}`, tkTopic);
 
       alert("Topic Key Retrieved Successfully!");
